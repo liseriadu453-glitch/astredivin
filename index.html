@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Astre Divin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: radial-gradient(ellipse at center, #1a0033 0%, #0d001a 50%, #000000 100%);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Transition overlay */
+        .page-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1a0033 0%, #0d001a 50%, #000000 100%);
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .page-transition.active {
+            opacity: 1;
+        }
+
+        .page-transition-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .transition-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #a855f7;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #a855f7;
+            animation: particleFloat 1s ease-out forwards;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translate(0, 0) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Page fade in */
+        body {
+            animation: pageLoadFade 0.5s ease-in;
+        }
+
+        @keyframes pageLoadFade {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Scrollbar personnalisée */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0d001a;
+            border-left: 1px solid #a855f7;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #a855f7 0%, #7c3aed 100%);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #b47ef8 0%, #8b4ff0 100%);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+        }
+
+        /* Pour Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #a855f7 #0d001a;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 3px white;
+            animation: starTwinkle 3s ease-in-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.5);
+            }
+        }
+
+        nav {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 30px 20px;
+            flex-wrap: wrap;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        nav::before,
+        nav::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 150px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #a855f7, transparent);
+            box-shadow: 0 0 20px #a855f7;
+        }
+
+        nav::before {
+            left: calc(-170px - -80px);
+        }
+
+        nav::after {
+            right: calc(-170px - -80px);
+        }
+
+        .nav-button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+            border: 2px solid #a855f7;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-button:hover::before {
+            left: 100%;
+        }
+
+        .nav-button:hover {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.4) 0%, rgba(124, 58, 237, 0.4) 100%);
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+            transform: translateY(-3px);
+        }
+
+        .nav-button.active {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.5) 0%, rgba(124, 58, 237, 0.5) 100%);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.8);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 20px 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .title-decoration {
+            position: relative;
+            display: inline-block;
+            padding: 30px 80px;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 
+                0 0 10px #a855f7,
+                0 0 20px #a855f7,
+                0 0 30px #a855f7,
+                0 0 40px #7c3aed;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .carousel-container {
+            max-width: 900px;
+            margin: 0 auto 60px;
+            position: relative;
+            border: 3px solid #a855f7;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 
+                0 0 30px rgba(168, 85, 247, 0.5),
+                inset 0 0 20px rgba(168, 85, 247, 0.2);
+        }
+
+        .carousel {
+            position: relative;
+            width: 100%;
+            height: 500px;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .carousel-slide.active {
+            opacity: 1;
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(168, 85, 247, 0.8);
+            border: 2px solid #a855f7;
+            color: white;
+            font-size: 24px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+        }
+
+        .carousel-button:hover {
+            background: rgba(168, 85, 247, 1);
+            box-shadow: 0 0 30px rgba(168, 85, 247, 1);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-button.prev {
+            left: 20px;
+        }
+
+        .carousel-button.next {
+            right: 20px;
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid #a855f7;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: #a855f7;
+            box-shadow: 0 0 15px #a855f7;
+            transform: scale(1.2);
+        }
+
+        .links-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .link-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            padding: 18px 40px;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+            border: 2px solid #a855f7;
+            border-radius: 50px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .link-button:hover::before {
+            left: 100%;
+        }
+
+        .link-button:hover {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.4) 0%, rgba(124, 58, 237, 0.4) 100%);
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.8);
+            transform: translateY(-5px);
+        }
+
+        .link-icon {
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                gap: 10px;
+                padding: 20px 10px;
+            }
+
+            nav::before,
+            nav::after {
+                display: none;
+            }
+
+            .nav-button {
+                padding: 10px 20px;
+                font-size: 0.95rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .title-decoration::before,
+            .title-decoration::after,
+            .decorative-swirl-left,
+            .decorative-swirl-right {
+                display: none;
+            }
+
+            .carousel {
+                height: 350px;
+            }
+
+            .link-button {
+                padding: 15px 30px;
+                font-size: 1rem;
+            }
+        }
+                /* FOOTER */
+        footer {
+            position: relative;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, #000000 100%);
+            border-top: 2px solid #a855f7;
+            margin-top: 80px;
+            padding: 40px 20px 20px;
+            box-shadow: 
+                0 -5px 30px rgba(168, 85, 247, 0.3),
+                inset 0 1px 20px rgba(168, 85, 247, 0.2);
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                #a855f7 20%, 
+                #7c3aed 50%, 
+                #a855f7 80%, 
+                transparent 100%);
+            box-shadow: 0 0 20px #a855f7;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .footer-section h3 {
+            color: #a855f7;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #a855f7;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, #a855f7, transparent);
+            box-shadow: 0 0 10px #a855f7;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #e5e5e5;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .footer-section a {
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .footer-section a::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #a855f7;
+            transition: transform 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #a855f7;
+            padding-left: 25px;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        }
+
+        .footer-section a:hover::before {
+            transform: translateX(3px);
+        }
+
+                .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(168, 85, 247, 0.2);
+            border: 2px solid #a855f7;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+        }
+
+        .social-icon:hover {
+            background: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+            transform: translateY(-3px) scale(1.1);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(168, 85, 247, 0.3);
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        .copyright {
+            color: #999;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .copyright span {
+            color: #a855f7;
+            font-weight: bold;
+            text-shadow: 0 0 5px #a855f7;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .footer-links a {
+            color: #999;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+            display: inline-block;
+            padding: 0;
+        }
+
+        .footer-links a::before {
+            display: none;
+        }
+
+        .footer-links a:hover {
+            color: #a855f7;
+            padding-left: 0;
+        }
+
+        .footer-links span {
+            color: #666;
+            margin: 0 5px;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .footer-links span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-transition" id="pageTransition">
+        <div class="page-transition-particles" id="transitionParticles"></div>
+    </div>
+
+    <div class="stars" id="starsContainer"></div>
+    
+    <nav>
+        <a href="#accueil" class="nav-button active">Accueil</a>
+        <a href="jeux.html" class="nav-button" onclick="return navigateWithTransition(event, 'jeux.html')">Jeux</a>
+        <a href="bar.html" class="nav-button" onclick="return navigateWithTransition(event, 'bar.html')">Bar</a>
+        <a href="contact.html" class="nav-button" onclick="return navigateWithTransition(event, 'contact.html')">Contact</a>
+    </nav>
+
+    <div class="container">
+        <header>
+            <div class="title-decoration">
+                <h1>L'Astre Divin</h1>
+            </div>
+        </header>
+
+        <div class="carousel-container">
+            <div class="carousel">
+                <div class="carousel-slide active">
+                    <img src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=900&h=500&fit=crop" alt="Galaxie violette">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=900&h=500&fit=crop" alt="Nébuleuse">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=900&h=500&fit=crop" alt="Étoiles cosmiques">
+                </div>
+
+                <button class="carousel-button prev" onclick="changeSlide(-1)">‹</button>
+                <button class="carousel-button next" onclick="changeSlide(1)">›</button>
+
+                <div class="carousel-indicators">
+                    <span class="indicator active" onclick="goToSlide(0)"></span>
+                    <span class="indicator" onclick="goToSlide(1)"></span>
+                    <span class="indicator" onclick="goToSlide(2)"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="links-container">
+            <a href="https://discord.gg/y4dC8SPGX8" class="link-button" target="_blank">
+                <span class="link-icon">💬</span>
+                <span>Rejoindre le Discord</span>
+            </a>
+            <a href="jeux.html" class="link-button" onclick="return navigateWithTransition(event, 'jeux.html')">
+                <span class="link-icon">🎮</span>
+                <span>Jeux Proposés</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Création des étoiles scintillantes
+        function createStars() {
+            const starsContainer = document.getElementById('starsContainer');
+            const numberOfStars = 100;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        createStars();
+
+        // Carrousel
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const indicators = document.querySelectorAll('.indicator');
+        const totalSlides = slides.length;
+
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            indicators.forEach(indicator => indicator.classList.remove('active'));
+            
+            if (index >= totalSlides) currentSlide = 0;
+            if (index < 0) currentSlide = totalSlides - 1;
+            
+            slides[currentSlide].classList.add('active');
+            indicators[currentSlide].classList.add('active');
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            showSlide(currentSlide);
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            showSlide(currentSlide);
+        }
+
+        // Auto-défilement toutes les 5 secondes
+        setInterval(() => {
+            changeSlide(1);
+        }, 5000);
+
+        // Transition entre les pages
+        function navigateWithTransition(event, url) {
+            event.preventDefault();
+            
+            const transition = document.getElementById('pageTransition');
+            const particlesContainer = document.getElementById('transitionParticles');
+            
+            // Créer des particules
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'transition-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+                particle.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
+                particle.style.animationDelay = Math.random() * 0.2 + 's';
+                particlesContainer.appendChild(particle);
+            }
+            
+            // Activer la transition
+            transition.classList.add('active');
+            
+            // Naviguer après l'animation
+            setTimeout(() => {
+                window.location.href = url;
+            }, 500);
+            
+            return false;
+        }
+    </script>
+        <!-- FOOTER À COPIER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>L'Astre Divin</h3>
+                <p>Votre communauté de jeux de société et de convivialité. Rejoignez-nous pour des soirées inoubliables !</p>
+                <div class="social-links">
+                    <a href="https://discord.gg/y4dC8SPGX8" class="social-icon" target="_blank" title="Discord">💬</a>
+                    <a href="#" class="social-icon" target="_blank" title="YouTube">▶️</a>
+                    <a href="#" class="social-icon" target="_blank" title="Twitter">🐦</a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Navigation</h3>
+                <a href="index.html">Accueil</a>
+                <a href="jeux.html">Jeux Proposés</a>
+                <a href="bar.html">Bar</a>
+                <a href="contact.html">Contact</a>
+            </div>
+
+            <div class="footer-section">
+                <h3>Nos Jeux</h3>
+                <a href="jeux.html">Loup-Garou</a>
+                <a href="#">???</a>
+                <a href="#">???</a>
+                <a href="#">???</a>
+            </div>
+
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>📧 Liseria ( Discord )</p>
+                <p>🕐 Ouvert les samedis</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p class="copyright">
+                © 2026 <span>L'Astre Divin</span> - Tous droits réservés
+            </p>
+            <div class="footer-links">
+                <a href="#">Mentions légales</a>
+                <span>•</span>
+                <a href="#">Politique de confidentialité</a>
+                <span>•</span>
+                <a href="#">Conditions d'utilisation</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
